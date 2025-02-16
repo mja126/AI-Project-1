@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Diagnosis System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cancer Diagnosis System</h2>
+        <p>Do you suspect you might have cancer?</p>
+        <button onclick="askGender(true)">Yes</button>
+        <button onclick="askGender(false)">No</button>
+        
+        <div id="genderSelection" class="hidden">
+            <p>Select your gender:</p>
+            <button onclick="showSymptoms('Male')">Male</button>
+            <button onclick="showSymptoms('Female')">Female</button>
+        </div>
+        
+        <div id="symptomSelection" class="hidden">
+            <p>Select the symptoms:</p>
+            <div class="symptom-list" id="symptomList"></div>
+            <button onclick="diagnose()">Diagnose</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const cancerData = {
+            "Testicular Cancer": ["Lower belly, groin or back pain", "Pain or discomfort in the testicle", "Swelling or heaviness of scrotum", "Lumps or swelling of the testicles"],
+            "Prostate Cancer": ["Sudden weight loss", "Blood in urine or semen", "Trouble with urination", "Bone pain"],
+            "Lymphoma": ["Fatigue", "Sudden weight loss", "Coughing or wheezing", "Chest pain", "Shortness of breath", "Coughing up blood", "Feeling of discomfort", "Swollen neck, armpit or groin glands"],
+            "Lung Cancer": ["Fatigue", "Sudden weight loss", "Coughing or wheezing", "Chest pain", "Shortness of breath", "Coughing up blood"],
+            "Pancreatic Cancer": ["Fatigue", "Sudden weight loss", "Yellowing of eyes or skin", "Dark colored urine", "Belly or back pain"],
+            "Ovarian Cancer": ["Fatigue", "Abdominal bloating", "Discomfort in pelvic region", "Constipation or frequent urination"],
+            "Cervical Cancer": ["Fatigue", "Coughing or wheezing", "Uncommon vaginal bleeding", "Watery discharge with blood or strong odor", "Painful bowel movements or urination"],
+            "Breast Cancer": ["Lump in the breast", "Flattened or inverted nipple", "Changes in shape, color or size of breast", "Peeling, flaking or crusting of breast skin"]
+        };
+
+        const treatments = {
+            "Testicular Cancer": ["Surgery", "Radiation Therapy", "Chemotherapy"],
+            "Prostate Cancer": ["Surgery", "Radiation", "Hormone Therapy"],
+            "Lymphoma": ["Chemotherapy", "Radiation Therapy", "Immunotherapy"],
+            "Lung Cancer": ["Chemotherapy", "Targeted Therapy", "Radiation Therapy"],
+            "Pancreatic Cancer": ["Surgery", "Chemotherapy", "Targeted Therapy"],
+            "Ovarian Cancer": ["Surgery", "Chemotherapy"],
+            "Cervical Cancer": ["Surgery", "Radiation", "Chemotherapy"],
+            "Breast Cancer": ["Mastectomy", "Radiation", "Chemotherapy"]
+        };
+
+        function askGender(suspects) {
+            if (!suspects) {
+                document.getElementById("result").innerHTML = "No cancer suspected.";
+                return;
+            }
+            document.getElementById("genderSelection").classList.remove("hidden");
+        }
+
+        function showSymptoms(gender) {
+            document.getElementById("symptomSelection").classList.remove("hidden");
+            const symptomList = document.getElementById("symptomList");
+            symptomList.innerHTML = "";
+            
+            const allSymptoms = new Set();
+            Object.values(cancerData).forEach(symptoms => symptoms.forEach(symptom => allSymptoms.add(symptom)));
+            
+            const sortedSymptoms = Array.from(allSymptoms).sort();
+            sortedSymptoms.forEach(symptom => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = symptom;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(" " + symptom));
+                symptomList.appendChild(label);
+                symptomList.appendChild(document.createElement("br"));
+            });
+        }
+
+        function diagnose() {
+            const selectedSymptoms = Array.from(document.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
+            let bestMatch = "No cancer suspected";
+            let maxMatch = 0;
+            
+            for (const [cancer, symptoms] of Object.entries(cancerData)) {
+                const matchCount = selectedSymptoms.filter(symptom => symptoms.includes(symptom)).length;
+                if (matchCount > maxMatch) {
+                    maxMatch = matchCount;
+                    bestMatch = cancer;
+                }
+            }
+            
+            let resultText = `<p>Diagnosis: ${bestMatch}</p>`;
+            if (treatments[bestMatch]) {
+                resultText += `<p>Treatment: ${treatments[bestMatch].join(", ")}</p>`;
+            }
+            
+            document.getElementById("result").innerHTML = resultText;
+        }
+    </script>
+</body>
+</html>
