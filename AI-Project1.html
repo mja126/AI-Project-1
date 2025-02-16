@@ -24,6 +24,10 @@
             font-weight: bold;
             margin-top: 20px;
         }
+        .symptom-list label {
+            display: block;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -32,32 +36,80 @@
         <p>Do you suspect you might have cancer?</p>
         <button onclick="askGender(true)">Yes</button>
         <button onclick="askGender(false)">No</button>
-        
+
         <div id="genderSelection" class="hidden">
             <p>Select your gender:</p>
             <button onclick="showSymptoms('Male')">Male</button>
             <button onclick="showSymptoms('Female')">Female</button>
         </div>
-        
+
         <div id="symptomSelection" class="hidden">
             <p>Select the symptoms:</p>
             <div class="symptom-list" id="symptomList"></div>
             <button onclick="diagnose()">Diagnose</button>
         </div>
-        
+
         <div class="result" id="result"></div>
     </div>
 
     <script>
         const cancerData = {
-            "Testicular Cancer": ["Lower belly, groin or back pain", "Pain or discomfort in the testicle", "Swelling or heaviness of scrotum", "Lumps or swelling of the testicles"],
-            "Prostate Cancer": ["Sudden weight loss", "Blood in urine or semen", "Trouble with urination", "Bone pain"],
-            "Lymphoma": ["Fatigue", "Sudden weight loss", "Coughing or wheezing", "Chest pain", "Shortness of breath", "Coughing up blood", "Feeling of discomfort", "Swollen neck, armpit or groin glands"],
-            "Lung Cancer": ["Fatigue", "Sudden weight loss", "Coughing or wheezing", "Chest pain", "Shortness of breath", "Coughing up blood"],
-            "Pancreatic Cancer": ["Fatigue", "Sudden weight loss", "Yellowing of eyes or skin", "Dark colored urine", "Belly or back pain"],
-            "Ovarian Cancer": ["Fatigue", "Abdominal bloating", "Discomfort in pelvic region", "Constipation or frequent urination"],
-            "Cervical Cancer": ["Fatigue", "Coughing or wheezing", "Uncommon vaginal bleeding", "Watery discharge with blood or strong odor", "Painful bowel movements or urination"],
-            "Breast Cancer": ["Lump in the breast", "Flattened or inverted nipple", "Changes in shape, color or size of breast", "Peeling, flaking or crusting of breast skin"]
+            "Testicular Cancer": [
+                "Lower belly, groin or back pain", 
+                "Pain or discomfort in the testicle", 
+                "Swelling or heaviness of scrotum", 
+                "Lumps or swelling of the testicles"
+            ],
+            "Prostate Cancer": [
+                "Sudden weight loss", 
+                "Blood in urine or semen", 
+                "Trouble with urination", 
+                "Bone pain"
+            ],
+            "Lymphoma": [
+                "Fatigue", 
+                "Sudden weight loss", 
+                "Coughing or wheezing", 
+                "Chest pain", 
+                "Shortness of breath", 
+                "Coughing up blood", 
+                "Feeling of discomfort", 
+                "Swollen neck, armpit or groin glands"
+            ],
+            "Lung Cancer": [
+                "Fatigue", 
+                "Sudden weight loss", 
+                "Coughing or wheezing", 
+                "Chest pain", 
+                "Shortness of breath", 
+                "Coughing up blood"
+            ],
+            "Pancreatic Cancer": [
+                "Fatigue", 
+                "Sudden weight loss", 
+                "Yellowing of eyes or skin", 
+                "Dark colored urine", 
+                "Belly or back pain"
+            ],
+            "Ovarian Cancer": [
+                "Fatigue", 
+                "Abdominal bloating", 
+                "Discomfort in pelvic region", 
+                "Constipation or frequent urination"
+            ],
+            "Cervical Cancer": [
+                "Fatigue", 
+                "Coughing or wheezing", 
+                "Uncommon vaginal bleeding", 
+                "Watery discharge with blood or strong odor", 
+                "Painful bowel movements or urination"
+            ],
+            "Breast Cancer": [
+                "Lump in the breast", 
+                "Flattened or inverted nipple", 
+                "Changes in shape, color or size of breast", 
+                "Peeling, flaking or crusting of breast skin"
+            ]
         };
 
         const treatments = {
@@ -71,6 +123,40 @@
             "Breast Cancer": ["Mastectomy", "Radiation", "Chemotherapy"]
         };
 
+        // 31 symptoms from the original C++ code in alphabetical order
+        const allSymptoms = [
+            "Abdominal bloating",
+            "Belly or back pain",
+            "Bone pain",
+            "Coughing or wheezing",
+            "Coughing up blood",
+            "Changes in shape, color or size of breast",
+            "Dark colored urine",
+            "Discomfort in pelvic region",
+            "Fatigue",
+            "Feeling of discomfort",
+            "Heavy smoker or drinker",
+            "History of GERD",
+            "Lump in the breast",
+            "Lower belly, groin or back pain",
+            "Pain or discomfort in the testicle",
+            "Peeling, flaking or crusting of breast skin",
+            "Flattened or inverted nipple",
+            "Swelling or heaviness of scrotum",
+            "Shortness of breath",
+            "Sudden weight loss",
+            "Swollen neck, armpit or groin glands",
+            "Trouble with urination",
+            "Uncommon vaginal bleeding",
+            "Watery discharge with blood or strong odor",
+            "Yellowing of eyes or skin",
+            "Coughing or pain in the chest",
+            "Painful bowel movements or urination",
+            "Blood in urine or semen",
+            "Difficulty swallowing",
+            "Constipation or frequent urination"
+        ];
+
         function askGender(suspects) {
             if (!suspects) {
                 document.getElementById("result").innerHTML = "No cancer suspected.";
@@ -80,15 +166,14 @@
         }
 
         function showSymptoms(gender) {
+            document.getElementById("genderSelection").classList.add("hidden");
             document.getElementById("symptomSelection").classList.remove("hidden");
+
             const symptomList = document.getElementById("symptomList");
             symptomList.innerHTML = "";
-            
-            const allSymptoms = new Set();
-            Object.values(cancerData).forEach(symptoms => symptoms.forEach(symptom => allSymptoms.add(symptom)));
-            
-            const sortedSymptoms = Array.from(allSymptoms).sort();
-            sortedSymptoms.forEach(symptom => {
+
+            // Sort symptoms alphabetically before displaying them
+            allSymptoms.sort().forEach(symptom => {
                 const label = document.createElement("label");
                 const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
@@ -102,9 +187,10 @@
 
         function diagnose() {
             const selectedSymptoms = Array.from(document.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
+
             let bestMatch = "No cancer suspected";
             let maxMatch = 0;
-            
+
             for (const [cancer, symptoms] of Object.entries(cancerData)) {
                 const matchCount = selectedSymptoms.filter(symptom => symptoms.includes(symptom)).length;
                 if (matchCount > maxMatch) {
@@ -112,12 +198,12 @@
                     bestMatch = cancer;
                 }
             }
-            
+
             let resultText = `<p>Diagnosis: ${bestMatch}</p>`;
             if (treatments[bestMatch]) {
                 resultText += `<p>Treatment: ${treatments[bestMatch].join(", ")}</p>`;
             }
-            
+
             document.getElementById("result").innerHTML = resultText;
         }
     </script>
