@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Diagnosis System (WebAssembly)</title>
+    <script src="diagnosis.js"></script>
+    <script>
+        let diagnoseCancer;
+
+        // Load WebAssembly module
+        Module.onRuntimeInitialized = function() {
+            diagnoseCancer = Module.cwrap("diagnoseCancer", "string", ["string"]);
+            Module._initialize(); // Initialize C++ data structures
+        };
+
+        function askCancerSuspicion(answer) {
+            if (answer === 'no') {
+                document.getElementById("questionSection").innerHTML = "<p>No diagnosis needed.</p>";
+                return;
+            }
+            document.getElementById("questionSection").classList.add("hidden");
+            document.getElementById("genderSelection").classList.remove("hidden");
+        }
+
+        function selectGender(gender) {
+            document.getElementById("genderSelection").classList.add("hidden");
+            document.getElementById("symptomSelection").classList.remove("hidden");
+
+            const symptoms = [
+                "Abdominal bloating", "Belly or back pain", "Blood in urine or semen", "Bone pain", "Chest pain", "Changes in shape, color or size of breast",
+                "Constipation or frequent urination", "Coughing or wheezing", "Coughing up blood", "Dark colored urine", "Difficulty swallowing",
+                "Discomfort in pelvic region", "Fatigue", "Feeling of discomfort", "Flattened or inverted nipple", "Heavy smoker or drinker",
+                "History of GERD", "Lump in the breast", "Lower belly, groin or back pain", "Pain or discomfort in the testicle",
+                "Painful bowel movements or urination", "Peeling, flaking or crusting of breast skin", "Shortness of breath", "Sudden weight loss",
+                "Swelling or heaviness of scrotum", "Swollen neck, armpit or groin glands", "Trouble with urination", "Uncommon vaginal bleeding",
+                "Watery discharge with blood or strong odor", "Yellowing of eyes or skin"
+            ];
+
+            symptoms.sort(); // Alphabetical order
+
+            const symptomList = document.getElementById("symptomList");
+            symptomList.innerHTML = ""; // Clear previous content
+            symptoms.forEach(symptom => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = symptom;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(" " + symptom));
+                symptomList.appendChild(label);
+                symptomList.appendChild(document.createElement("br"));
+            });
+        }
+
+        function diagnose() {
+            const selectedSymptoms = Array.from(document.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
+            const symptomsJson = selectedSymptoms.join(",");
+
+            // Call WebAssembly function
+            const resultJson = diagnoseCancer(symptomsJson);
+            const result = JSON.parse(resultJson);
+
+            document.getElementById("result").innerHTML = `<p>Diagnosis: ${result.diagnosis}</p>
+                                                           <p>Treatments: ${result.treatments.length > 0 ? result.treatments.join(", ") : "No treatment available"}</p>`;
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="questionSection">
+        <h2>Cancer Diagnosis System</h2>
+        <p>Do you suspect you might have cancer?</p>
+        <button onclick="askCancerSuspicion('yes')">Yes</button>
+        <button onclick="askCancerSuspicion('no')">No</button>
+    </div>
+
+    <div id="genderSelection" class="hidden">
+        <p>Select your gender:</p>
+        <button onclick="selectGender('Male')">Male</button>
+        <button onclick="selectGender('Female')">Female</button>
+    </div>
+
+    <div id="symptomSelection" class="hidden">
+        <p>Select the symptoms you are experiencing:</p>
+        <div id="symptomList"></div>
+        <button onclick="diagnose()">Diagnose</button>
+    </div>
+
+    <div id="result"></div>
+</body>
+</html>
