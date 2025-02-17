@@ -41,5 +41,5 @@ Compiling the code: <br />
       &ensp; Run WebAssembly in the Browser <br />
             &emsp; &emsp; python -m http.server 8000 (edit 8000 to whatever port you'll be using) <br />
       &ensp; Open: <br />
-            &emsp; &emsp; http://localhost:8000/example.html (edit 8000 to whatever port you'll be using) <br />
+            &emsp; &emsp; http://localhost:8000/diagnosis.html (edit 8000 to whatever port you'll be using) <br />
 
