@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 using namespace std;
+
 // Global Lists and Variables
 unordered_map<string, string> variableList;  // Variable to value mapping
 unordered_map<int, string> ruleList;     // Rule number to diagnosis mapping
@@ -11,6 +12,7 @@ unordered_map<string, int> clauseVariableList;  // Mapping symptoms to clause nu
 unordered_map<int, vector<string>> ruleClauses;  // Rule to clause variables mapping
 unordered_map<string, vector<string>> treatmentOptions;  // Diagnosis to treatment mapping
 unordered_map<string, string> derivedGlobalVariableList;  // List of derived global conclusions
+
 // Backward Chaining Functions
 int search_con(const string& variable);
 int rule_to_clause(int ruleNumber);
@@ -18,8 +20,10 @@ void update_VL(int Ci);
 void validate_Ri(int Ri, string& conclusion);
 void process(const string& variable);
 void backward_chaining(const string& goalVariable);
+
 // Forward Chaining Function (for treatment)
 void forward_chaining(const string& diagnosis);
+
 // Initialize the system with rules, symptoms, and treatments
 void initialize() {
     // Initialize symptoms and their corresponding clause numbers
@@ -54,6 +58,7 @@ void initialize() {
     clauseVariableList["Flattened or inverted nipple"] = 29;
     clauseVariableList["Changes in shape, color or size of breast"] = 30;
     clauseVariableList["Peeling, flaking or crusting of breast skin"] = 31;
+
     // Initialize ruleList with diagnosis (Rule numbers mapped to diagnosis)
     ruleList[1] = "Testicular Cancer";
     ruleList[2] = "Prostate Cancer";
@@ -64,6 +69,7 @@ void initialize() {
     ruleList[7] = "Ovarian Cancer";
     ruleList[8] = "Cervical Cancer";
     ruleList[9] = "Breast Cancer";
+
     // Initialize treatment options for each cancer
     treatmentOptions["Testicular Cancer"] = {"Surgery", "Chemotherapy", "Radiation therapy"};
     treatmentOptions["Prostate Cancer"] = {"Surgery", "Hormone therapy", "Radiation therapy"};
@@ -74,6 +80,7 @@ void initialize() {
     treatmentOptions["Ovarian Cancer"] = {"Surgery", "Chemotherapy", "Targeted therapy"};
     treatmentOptions["Cervical Cancer"] = {"Surgery", "Chemotherapy", "Radiation therapy"};
     treatmentOptions["Breast Cancer"] = {"Surgery", "Chemotherapy", "Hormone therapy", "Immunotherapy"};
+
     // Initialize the derived global variable list (empty initially)
     derivedGlobalVariableList.clear();
 }
@@ -85,10 +92,12 @@ int search_con(const string& variable) {
     }
     return -1;  // If not found, return -1
 }
+
 // Convert rule number to clause number
 int rule_to_clause(int ruleNumber) {
     return 4 * (ruleNumber - 1) + 1;  // Assuming 4 slots per rule
 }
+
 // Update the Variable List (asks the user for values)
 void update_VL(int Ci) {
     // Ask the user for values of variables starting from Ci
@@ -99,6 +108,7 @@ void update_VL(int Ci) {
         variableList[to_string(i)] = input;  // Store the variable in the list
     }
 }
+
 // Validate the rule based on the clause variables
 void validate_Ri(int Ri, string& conclusion) {
     // Example: If conditions are met, assign the conclusion
@@ -107,6 +117,7 @@ void validate_Ri(int Ri, string& conclusion) {
         derivedGlobalVariableList[ruleList[Ri]] = conclusion;
     }
 }
+
 // Process a variable to start backward chaining
 void process(const string& variable) {
     int ruleNum = search_con(variable);
@@ -124,6 +135,7 @@ void process(const string& variable) {
         cout << "No valid conclusion found." << endl;
     }
 }
+
 // Backward Chaining algorithm to find the goal variable
 void backward_chaining(const string& goalVariable) {
     cout << "Starting backward chaining for: " << goalVariable << endl;
@@ -140,16 +152,20 @@ void forward_chaining(const string& diagnosis) {
         cout << "No treatment options found for " << diagnosis << endl;
     }
 }
+
 // Main function
 int main() {
     initialize();  // Initialize the system with symptoms, rules, and treatments
+
     // Step 1: Backward Chaining for Diagnosis
     string goalVariable = "Testicular Cancer";  // Example: goal variable is the diagnosis we need
     backward_chaining(goalVariable);  // Run backward chaining to determine the diagnosis
+    
     // After backward chaining, check the result in the global variable list
     if (derivedGlobalVariableList.find(goalVariable) != derivedGlobalVariableList.end()) {
         cout << "Goal variable (" << goalVariable << ") found with value: "
              << derivedGlobalVariableList[goalVariable] << endl;
+
         // Step 2: Forward Chaining for Treatment Options
         forward_chaining(derivedGlobalVariableList[goalVariable]);  // Get treatment options for the diagnosis
     } else {
